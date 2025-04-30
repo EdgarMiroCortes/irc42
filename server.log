@@ -1,0 +1,11 @@
+IRC Server started on port 6667
+Server is running on port 6667
+Press Ctrl+C to stop the server
+New connection from 127.0.0.1 on socket 4
+Received from 4: PASS password
+Received from 4: NICK testuser
+Received from 4: USER testuser 0 * :Test User
+Client 4 (testuser) registered
+Client 4 disconnected
+
+Shutting down server...

@@ -1,0 +1,138 @@
+#ifndef IRCSERV_HPP
+#define IRCSERV_HPP
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <cstring>
+#include <ctime>
+#include <sstream>
+#include <fstream>
+#include <cctype>
+#include <cstdlib>
+#include <csignal>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <errno.h>
+
+// Forward declarations
+class Client;
+class Channel;
+class Server;
+class Message;
+
+// RFC 2812 - Internet Relay Chat: Client Protocol
+// IRC Numeric Replies and Error Codes
+#define RPL_WELCOME             "001"
+#define RPL_YOURHOST           "002"
+#define RPL_CREATED            "003"
+#define RPL_MYINFO             "004"
+#define RPL_BOUNCE             "005"
+#define RPL_UMODEIS            "221"
+#define RPL_LUSERCLIENT        "251"
+#define RPL_LUSEROP            "252"
+#define RPL_LUSERUNKNOWN       "253"
+#define RPL_LUSERCHANNELS      "254"
+#define RPL_LUSERME            "255"
+#define RPL_AWAY               "301"
+#define RPL_UNAWAY             "305"
+#define RPL_NOWAWAY            "306"
+#define RPL_WHOISUSER          "311"
+#define RPL_WHOISSERVER        "312"
+#define RPL_WHOISOPERATOR      "313"
+#define RPL_ENDOFWHO           "315"
+#define RPL_WHOISIDLE          "317"
+#define RPL_ENDOFWHOIS         "318"
+#define RPL_WHOISCHANNELS      "319"
+#define RPL_CHANNELMODEIS      "324"
+#define RPL_NOTOPIC            "331"
+#define RPL_TOPIC              "332"
+#define RPL_INVITING           "341"
+#define RPL_NAMREPLY           "353"
+#define RPL_ENDOFNAMES         "366"
+#define RPL_BANLIST            "367"
+#define RPL_ENDOFBANLIST       "368"
+#define RPL_MOTD               "372"
+#define RPL_MOTDSTART          "375"
+#define RPL_ENDOFMOTD          "376"
+#define RPL_YOUREOPER          "381"
+#define RPL_TIME               "391"
+
+// Error replies
+#define ERR_NOSUCHNICK         "401"
+#define ERR_NOSUCHSERVER       "402"
+#define ERR_NOSUCHCHANNEL      "403"
+#define ERR_CANNOTSENDTOCHAN   "404"
+#define ERR_TOOMANYCHANNELS    "405"
+#define ERR_WASNOSUCHNICK      "406"
+#define ERR_TOOMANYTARGETS     "407"
+#define ERR_NOORIGIN           "409"
+#define ERR_NORECIPIENT        "411"
+#define ERR_NOTEXTTOSEND       "412"
+#define ERR_NOTOPLEVEL         "413"
+#define ERR_WILDTOPLEVEL       "414"
+#define ERR_UNKNOWNCOMMAND     "421"
+#define ERR_NOMOTD             "422"
+#define ERR_NOADMININFO        "423"
+#define ERR_FILEERROR          "424"
+#define ERR_NONICKNAMEGIVEN    "431"
+#define ERR_ERRONEUSNICKNAME   "432"
+#define ERR_NICKNAMEINUSE      "433"
+#define ERR_NICKCOLLISION      "436"
+#define ERR_USERNOTINCHANNEL   "441"
+#define ERR_NOTONCHANNEL       "442"
+#define ERR_USERONCHANNEL      "443"
+#define ERR_NOLOGIN            "444"
+#define ERR_SUMMONDISABLED     "445"
+#define ERR_USERSDISABLED      "446"
+#define ERR_NOTREGISTERED      "451"
+#define ERR_NEEDMOREPARAMS     "461"
+#define ERR_ALREADYREGISTERED  "462"
+#define ERR_NOPERMFORHOST      "463"
+#define ERR_PASSWDMISMATCH     "464"
+#define ERR_YOUREBANNEDCREEP   "465"
+#define ERR_KEYSET             "467"
+#define ERR_CHANNELISFULL      "471"
+#define ERR_UNKNOWNMODE        "472"
+#define ERR_INVITEONLYCHAN     "473"
+#define ERR_BANNEDFROMCHAN     "474"
+#define ERR_BADCHANNELKEY      "475"
+#define ERR_BADCHANMASK        "476"
+#define ERR_NOPRIVILEGES       "481"
+#define ERR_CHANOPRIVSNEEDED   "482"
+#define ERR_CANTKILLSERVER     "483"
+#define ERR_NOOPERHOST         "491"
+#define ERR_UMODEUNKNOWNFLAG   "501"
+#define ERR_USERSDONTMATCH     "502"
+
+// Connection status
+#define CONNECTED      0
+#define PASS_OK        1
+#define NICK_OK        2
+#define USER_OK        3
+#define REGISTERED     4
+
+// Buffer size for receiving data
+#define BUFFER_SIZE 1024
+
+// Useful typedefs
+typedef std::map<std::string, Channel*> ChannelMap;
+typedef std::map<int, Client*> ClientMap;
+
+// Utility functions
+std::string currentDateTime();
+std::vector<std::string> split(const std::string& s, char delimiter);
+std::string toLower(const std::string& s);
+bool isValidNickname(const std::string& nickname);
+bool isValidChannelName(const std::string& channelName);
+
+#endif // IRCSERV_HPP 
