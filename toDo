@@ -1,13 +1,7 @@
 
 what is the limits of the channels per default?
 
-we want to get rid of these messages, we feel its unnecessary, comment it out.
-:ft_irc 004 user1 ft_irc 1.0 iowsraOk ntlmb
-:ft_irc 375 user1 - ft_irc Message of the Day - 
-:ft_irc 376 user1 End of MOTD command
++t mode now works properly from everyone to operator only, but not the other way around
 
-
-+t MODE doenst work, should start by default that everyone, without being channel operator can change the topic
-and then everytime a channel operator changes the +t mode it should restrict to only op or allow all, we want to know after changing what the current mode is
 
 
