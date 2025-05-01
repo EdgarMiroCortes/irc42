@@ -1,0 +1,10 @@
+INICIAR SERVIDOR:
+./ircserv 4444 123
+
+CONECTAR CLIENTES POR NC
+nc -c 127.0.0.1
+PASS 123
+NICK user1
+USER u1 0 * :usuario1
+JOIN #test
+PRIVMSG #test :Hola!

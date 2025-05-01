@@ -326,16 +326,19 @@ bool Channel::addClient(Client* client) {
     
     // Check if client is already in the channel
     if (isClient(client)) {
+        std::cout << "[DEBUG] El cliente " << client->getNickname() << " ya está en el canal." << std::endl;
         return false;
     }
     
     // Check if the client is banned
     if (isBanned(client)) {
+        std::cout << "[DEBUG] El cliente " << client->getNickname() << " está baneado." << std::endl;
         return false;
     }
     
     // Check if the channel is full
     if (_userLimit > 0 && _clients.size() >= _userLimit) {
+        std::cout << "[DEBUG] El canal está lleno." << std::endl;
         return false;
     }
     
@@ -345,6 +348,15 @@ bool Channel::addClient(Client* client) {
     // Add channel to client's channels
     client->joinChannel(this);
     
+    std::string joinMsg = ":" + client->getNickname() + " JOIN " + _name;
+    client->sendMessage(joinMsg);
+
+    broadcastMessage(joinMsg, client);
+    broadcastMessage(":" + client->getPrefix() + " JOIN " + _name);
+
+    std::cout << "[DEBUG] " << client->getNickname() << " se unió a " << _name 
+              << ". Miembros: " << _clients.size() << std::endl;
+
     return true;
 }
 
@@ -355,25 +367,36 @@ bool Channel::addClient(Client* client) {
  * @return True if the client was removed, false otherwise
  */
 bool Channel::removeClient(Client* client) {
-    if (!client) {
+    if (!client || !isClient(client)) {
         return false;
     }
     
-    // Check if client is in the channel
-    if (!isClient(client)) {
-        return false;
-    }
+    // // Remove client from channel
+    // _clients.erase(client->getNickname());
     
-    // Remove client from channel
-    _clients.erase(client->getNickname());
+    // // Remove client from operators and voiced users if applicable
+    // _operators.erase(client->getNickname());
+    // _voiced.erase(client->getNickname());
     
-    // Remove client from operators and voiced users if applicable
-    _operators.erase(client->getNickname());
-    _voiced.erase(client->getNickname());
+    // // Remove channel from client's channels
+    // client->leaveChannel(_name);
     
-    // Remove channel from client's channels
+    // return true;
+    
+    std::string nick = client->getNickname();
+    std::string partMsg = ":" + nick + " PART " + _name;
+
+    // Notificar al cliente y al canal
+    client->sendMessage(partMsg);
+    broadcastMessage(partMsg, client);
+
+    // Eliminar de listas internas
+    _clients.erase(nick);
+    _operators.erase(nick);
+    _voiced.erase(nick);
     client->leaveChannel(_name);
-    
+
+    std::cout << "[DEBUG] " << nick << " dejó el canal " << _name << std::endl;
     return true;
 }
 
@@ -648,7 +671,7 @@ bool Channel::setMode(char mode, bool add, const std::string& param) {
                     return false;
                 }
                 try {
-                    unsigned int limit = std::stoi(param);
+                    unsigned int limit = static_cast<unsigned int>(atoi(param.c_str()));
                     setUserLimit(limit);
                 } catch (const std::exception& e) {
                     return false;
@@ -702,7 +725,7 @@ bool Channel::setMode(char mode, bool add, const std::string& param) {
 void Channel::broadcastMessage(const std::string& message, Client* exclude) {
     for (std::map<std::string, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
         if (it->second && it->second != exclude) {
-            it->second->addToBuffer(message);
+            it->second->sendMessage(message);
         }
     }
 }

@@ -34,7 +34,7 @@ $(NAME): $(OBJS)
 	@$(CXX) $(CXXFLAGS) -o $@ $^
 	@echo "$(GREEN)$(NAME) successfully compiled!$(RESET)"
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS) | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS) Makefile | $(OBJ_DIR)
 	@echo "$(YELLOW)Compiling $<...$(RESET)"
 	@$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c $< -o $@
 
