@@ -1,7 +1,5 @@
 
-what is the limits of the channels per default?
-
-mode +l is not working for now 
-
-
+socket
+poll
+fcntl
 
