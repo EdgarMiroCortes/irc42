@@ -14,5 +14,14 @@ WHOIS user1 (solo funciona con nickname)
 MODE #test +i (change a channel to invite only)
 INVITE user #test (invite a user) -> to enter only JOIN normally
 
+MODE #test +o user1 (give operator permissions to user1 in chanel #test)
+
 TOPIC #test (display topic)
 TOPIC #test tirapollo (set topic)
+
+
+IRSSI:
+/connect 127.0.0.1 4444 123
+ /PRIVMSG user1 hola!
+ /JOIN #test pass
+ /PRIVMSG #test hola
