@@ -33,4 +33,8 @@ TOPIC:
 	MODE #test +t (RESTRICT change channel topic to only operators)
 	MODE #test -t (QUIT RESCTRICTION and all can change topic)
 
+USERS LIMIT:
+	MODE #test +l (LIMIT the number of users that can join the channel)
+	MODE #test -l (QUIT user limit. Now is "infinite")
+
 WHOIS user1 (solo funciona con nickname)
