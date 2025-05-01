@@ -1,0 +1,5 @@
+IRSSI:
+/connect 127.0.0.1 4444 123
+ /PRIVMSG user1 hola!
+ /JOIN #test pass
+ /PRIVMSG #test hola
