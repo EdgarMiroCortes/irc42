@@ -1,33 +1,39 @@
-INICIAR SERVIDOR:
-./ircserv 4444 123
+CONNECT:
+	SERVER:
+		./ircserv 4444 123 (iniciar servidor)
+	CLIENT:
+		nc -C 127.0.0.1 4444 (conectar cliente)
+		PASS 123
+		NICK user 1
+		USER u1 0 * :usuario1
 
-CONECTAR CLIENTES POR NC
-nc -C 127.0.0.1 4444
-PASS 123
-NICK user1
-USER u1 0 * :usuario1
-JOIN #test
-PRIVMSG #test :Hola! -- : no son necesarios pero los anade
+MESSAGES:
+	TO A USER:
+		PRIVMSG user2 : Mensaje privado!
+	TO A CHANNEL:
+		PRIVMSG #test : Mensaje por canal!
+
+PERMISSIONS:
+	MODE #test +o user1 (GIVE operator permissions to user1 in chanel #test)
+	MODE #test -o user1 (REMOVE operator permissions to user1 in chanel #test)
+
+INVITE ONLY:
+	INVITE user #test (invite a user) -> to enter only JOIN normally
+	MODE #test +i (GIVE to a channel to invite only)
+	MODE #test -i (REMOVE invite only from a channel)
+
+CHANNEL PASSWORDS:
+	JOIN #test pass
+	MODE #test +k pass (ADD password "pass" to a channel)
+	MODE #test -k pass (REMOVE password from a channel)
+
+TOPIC:
+	TOPIC #test (display topic)
+	TOPIC #test tirapollo (set topic)
+	MODE #test +t (RESTRICT change channel topic to only operators)
+	MODE #test -t (QUIT RESCTRICTION and all can change topic)
 
 WHOIS user1 (solo funciona con nickname)
-
-INVITE user #test (invite a user) -> to enter only JOIN normally
-
-MODE #test +i (GIVE to a channel to invite only)
-MODE #test -i (REMOVE invite only from a channel)
-
-MODE #test +k pass (ADD password "pass" to a channel)
-MODE #test -k pass (REMOVE password from a channel)
-
-MODE #test +o user1 (GIVE operator permissions to user1 in chanel #test)
-MODE #test -o user1 (REMOVE operator permissions to user1 in chanel #test)
-
-MODE #test +t (RESTRICT change channel topic to only operators)
-MODE #test -t (QUIT RESCTRICTION and all can change topic)
-
-TOPIC #test (display topic)
-TOPIC #test tirapollo (set topic)
-
 
 IRSSI:
 /connect 127.0.0.1 4444 123
