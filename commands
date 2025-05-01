@@ -7,6 +7,12 @@ PASS 123
 NICK user1
 USER u1 0 * :usuario1
 JOIN #test
-PRIVMSG #test :Hola!
+PRIVMSG #test :Hola! -- : no son necesarios pero los anade
 
 WHOIS user1 (solo funciona con nickname)
+
+MODE #test +i (change a channel to invite only)
+INVITE user #test (invite a user) -> to enter only JOIN normally
+
+TOPIC #test (display topic)
+TOPIC #test tirapollo (set topic)
