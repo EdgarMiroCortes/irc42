@@ -1,0 +1,17 @@
+IRC Server started on port 6671
+Server is running on port 6671
+Press Ctrl+C to stop the server
+New connection from 127.0.0.1 on socket 4
+Received from 4: PASS password
+Client 4 disconnected
+New connection from 127.0.0.1 on socket 4
+Received from 4: NICK user1
+Client 4 disconnected
+New connection from 127.0.0.1 on socket 4
+Received from 4: USER testuser1 0 * :Test User 1
+Client 4 disconnected
+New connection from 127.0.0.1 on socket 4
+Received from 4: JOIN #room1
+Client 4 disconnected
+
+Shutting down server...

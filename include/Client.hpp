@@ -77,7 +77,7 @@ public:
 
     // Channel operations
     void joinChannel(Channel* channel);
-    void leaveChannel(const std::string& channelName);
+    void leaveChannel(const std::string& channelName, bool removeFromChannel = true);
     void leaveAllChannels();
     bool isInChannel(const std::string& channelName) const;
     

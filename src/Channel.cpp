@@ -369,32 +369,19 @@ bool Channel::removeClient(Client* client) {
         return false;
     }
     
-    // // Remove client from channel
-    // _clients.erase(client->getNickname());
-    
-    // // Remove client from operators and voiced users if applicable
-    // _operators.erase(client->getNickname());
-    // _voiced.erase(client->getNickname());
-    
-    // // Remove channel from client's channels
-    // client->leaveChannel(_name);
-    
-    // return true;
-    
     std::string nick = client->getNickname();
-    std::string partMsg = ":" + nick + " PART " + _name;
-
-    // Notificar al cliente y al canal
-    client->sendMessage(partMsg);
-    broadcastMessage(partMsg, client);
-
+    // Don't create or send PART message here - it should be sent from the command handler
+    
     // Eliminar de listas internas
     _clients.erase(nick);
     _operators.erase(nick);
     _voiced.erase(nick);
-    client->leaveChannel(_name);
+    
+    // Make sure we don't cause a recursive loop with leaveChannel
+    // client calls leaveChannel -> channel removeClient -> client leaveChannel -> ...
+    client->leaveChannel(_name, false);  // Pass false to prevent recursive call back
 
-    std::cout << "[DEBUG] " << nick << " dejó el canal " << _name << std::endl;
+    std::cout << "[DEBUG] " << nick << " left channel " << _name << std::endl;
     return true;
 }
 

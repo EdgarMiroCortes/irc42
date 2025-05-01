@@ -409,17 +409,28 @@ void Client::joinChannel(Channel* channel) {
  * Leaves a channel
  * 
  * @param channelName Name of the channel to leave
+ * @param removeFromChannel Whether to also remove the client from the channel's list
  */
-void Client::leaveChannel(const std::string& channelName) {
-    _channels.erase(channelName);
+void Client::leaveChannel(const std::string& channelName, bool removeFromChannel) {
+    std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
+    if (it != _channels.end()) {
+        Channel* channel = it->second;
+        if (channel && removeFromChannel) {
+            channel->removeClient(this);
+        }
+        _channels.erase(it);
+    }
 }
 
 /**
  * Leaves all channels
  */
 void Client::leaveAllChannels() {
+    // Create a copy of the channels map to avoid modification during iteration
+    std::map<std::string, Channel*> channelsCopy = _channels;
+    
     // Notify all channels that the client is leaving
-    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+    for (std::map<std::string, Channel*>::iterator it = channelsCopy.begin(); it != channelsCopy.end(); ++it) {
         if (it->second) {
             it->second->removeClient(this);
         }
