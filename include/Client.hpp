@@ -3,15 +3,9 @@
 
 #include "ircserv.hpp"
 
-// User modes struct
+// User modes struct - simplified to only keep operator mode
 struct UserModes {
-    bool away;       // a - away
-    bool invisible;  // i - invisible
-    bool wallops;    // w - receive wallops
-    bool restricted; // r - restricted user connection
     bool operator_;  // o - operator flag
-    bool localOp;    // O - local operator flag
-    bool notices;    // s - receive server notices
 };
 
 class Client {

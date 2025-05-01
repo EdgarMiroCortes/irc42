@@ -393,7 +393,7 @@ void Server::_handleChannelMode(Message& message) {
     // If no modes are provided, just return the current modes
     if (message.paramsCount() == 1) {
         std::string currentModes = channel->getModes();
-        std::string modeReply = _buildReply(RPL_CHANNELMODEIS, client, channelName + " " + currentModes);
+        std::string modeReply = _buildReply(RPL_CHANNELMODEIS, client, channelName + " +" + currentModes);
         client->addToBuffer(modeReply);
         return;
     }
@@ -412,6 +412,7 @@ void Server::_handleChannelMode(Message& message) {
     std::string modeChanges = "";
     std::string paramChanges = "";
     bool topicModeChanged = false;
+    bool wasTopicRestricted = channel->isTopicRestricted();
     
     for (size_t i = 0; i < modeString.length(); i++) {
         char c = modeString[i];
@@ -466,13 +467,18 @@ void Server::_handleChannelMode(Message& message) {
         
         // If topic mode was changed, send additional info about current state
         if (topicModeChanged) {
+            bool isRestricted = channel->isTopicRestricted();
             std::string topicMsg;
-            if (channel->isTopicRestricted()) {
-                topicMsg = _buildReply("NOTICE", client, channelName + " :Topic is now restricted to channel operators");
-            } else {
-                topicMsg = _buildReply("NOTICE", client, channelName + " :Topic can now be changed by all channel members");
+            
+            // Only notify if the state actually changed
+            if (wasTopicRestricted != isRestricted) {
+                if (isRestricted) {
+                    topicMsg = ":" + _name + " NOTICE " + channelName + " :Topic is now restricted to channel operators";
+                } else {
+                    topicMsg = ":" + _name + " NOTICE " + channelName + " :Topic can now be changed by all channel members";
+                }
+                channel->broadcastMessage(topicMsg);
             }
-            channel->broadcastMessage(topicMsg);
         }
     }
 }
@@ -512,7 +518,6 @@ void Server::_handleUserMode(Message& message) {
         if (targetClient->isOperator()) {
             modeReply += "o";
         }
-        // Add other modes as needed
         client->addToBuffer(modeReply);
         return;
     }
@@ -535,38 +540,17 @@ void Server::_handleUserMode(Message& message) {
         
         bool modeChanged = false;
         
-        // Handle different user modes
-        switch (c) {
-            case 'i': // Invisible
-                // We don't have setVisible, so for now we'll ignore this
+        // Only handle the operator mode
+        if (c == 'o') { // Operator
+            // Only allow demotion, not promotion
+            if (!adding && (client->isOperator() || client == targetClient)) {
+                targetClient->setOperator(false);
                 modeChanged = true;
-                break;
-                
-            case 'o': // Operator
-                // Only allow demotion, not promotion
-                if (!adding && (client->isOperator() || client == targetClient)) {
-                    targetClient->setOperator(false);
-                    modeChanged = true;
-                } else if (adding && client->isOperator() && client != targetClient) {
-                    // Only IRC operators can promote others to operators
-                    targetClient->setOperator(true);
-                    modeChanged = true;
-                }
-                break;
-                
-            case 'w': // Receive wallops
-                // We don't have setReceiveWallops, so for now we'll ignore this
+            } else if (adding && client->isOperator() && client != targetClient) {
+                // Only IRC operators can promote others to operators
+                targetClient->setOperator(true);
                 modeChanged = true;
-                break;
-                
-            case 'a': // Away
-                // This should normally be set by the AWAY command, not MODE
-                // Just ignore it for now
-                break;
-                
-            default:
-                // Unknown mode, ignore
-                break;
+            }
         }
         
         if (modeChanged) {
@@ -638,7 +622,7 @@ void Server::_handleTopic(Message& message) {
     std::string newTopic = message.getParam(1);
     
     // Check if the channel is +t (topic protection) and the client is not an operator
-    if (channel->isTopicRestricted() && !channel->isOperator(client)) {
+    if (channel->isTopicRestricted() && !channel->isOperator(client) && !client->isOperator()) {
         std::string errMsg = _buildReply(ERR_CHANOPRIVSNEEDED, client, channelName + " :You're not channel operator");
         client->addToBuffer(errMsg);
         return;
@@ -830,14 +814,6 @@ void Server::_handleInvite(Message& message) {
     // Send the INVITE message to the invitee
     std::string inviteMsg = ":" + client->getPrefix() + " INVITE " + nickname + " " + channelName;
     targetClient->addToBuffer(inviteMsg);
-    
-    // If the target client is away, also notify the inviter
-    /* We don't have isAway method, so we'll skip this for now
-    if (targetClient->isAway()) {
-        std::string awayMsg = _buildReply(RPL_AWAY, client, nickname + " :" + targetClient->getAwayMessage());
-        client->addToBuffer(awayMsg);
-    }
-    */
 }
 
 /**
@@ -1077,8 +1053,7 @@ void Server::_handleWho(Message& message) {
     }
 
     if (message.paramsCount() < 1) {
-        // WHO with no parameters should list all visible users
-        // For simplicity, we'll just return an end of WHO list
+        // WHO with no parameters should list all users
         std::string endWhoMsg = _buildReply(RPL_ENDOFWHO, client, "* :End of WHO list");
         client->addToBuffer(endWhoMsg);
         return;
@@ -1108,7 +1083,7 @@ void Server::_handleWho(Message& message) {
                     targetClient->getHostname() + " " +
                     _name + " " +
                     targetClient->getNickname() + " " +
-                    (false ? "G" : "H") +
+                    "H" + // H for 'here' (always online in our implementation)
                     (targetClient->isOperator() ? "*" : "") +
                     (channel->isOperator(targetClient->getNickname()) ? "@" : 
                      (channel->hasVoice(targetClient->getNickname()) ? "+" : "")) +
@@ -1151,14 +1126,6 @@ void Server::_handleWho(Message& message) {
                 }
             }
             
-            // If no common channel, skip the client if they're not visible
-            // We don't have isVisible method, so we'll assume all clients are visible for now
-            /*
-            if (commonChannel.empty() && !targetClient->isVisible()) {
-                continue;
-            }
-            */
-            
             // Build the WHO reply
             std::string whoReply = _buildReply(RPL_WHOREPLY, client,
                 commonChannel + " " +
@@ -1166,7 +1133,7 @@ void Server::_handleWho(Message& message) {
                 targetClient->getHostname() + " " +
                 _name + " " +
                 targetClient->getNickname() + " " +
-                (false ? "G" : "H") +
+                "H" + // H for 'here' (always online in our implementation)
                 (targetClient->isOperator() ? "*" : "") +
                 (commonChannel.empty() ? "" : 
                  (targetChannels[commonChannel]->isOperator(targetClient->getNickname()) ? "@" : 

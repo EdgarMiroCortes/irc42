@@ -8,14 +8,8 @@ Client::Client()
     : _fd(-1), _status(CONNECTED), _authenticated(false), _registered(false), 
       _isOper(false), _commandProcessed(false) {
     
-    // Initialize all modes to false
-    _modes.away = false;
-    _modes.invisible = false;
-    _modes.wallops = false;
-    _modes.restricted = false;
+    // Initialize operator mode to false
     _modes.operator_ = false;
-    _modes.localOp = false;
-    _modes.notices = false;
     
     // Set last activity to current time
     _lastActivity = time(NULL);
@@ -31,14 +25,8 @@ Client::Client(int fd, const std::string& hostname)
     : _fd(fd), _status(CONNECTED), _hostname(hostname), _authenticated(false), 
       _registered(false), _isOper(false), _commandProcessed(false) {
     
-    // Initialize all modes to false
-    _modes.away = false;
-    _modes.invisible = false;
-    _modes.wallops = false;
-    _modes.restricted = false;
+    // Initialize operator mode to false
     _modes.operator_ = false;
-    _modes.localOp = false;
-    _modes.notices = false;
     
     // Set last activity to current time
     _lastActivity = time(NULL);
@@ -224,16 +212,10 @@ bool Client::isOperator() const {
  * @return True if the client has the mode, false otherwise
  */
 bool Client::hasMode(char mode) const {
-    switch (mode) {
-        case 'a': return _modes.away;
-        case 'i': return _modes.invisible;
-        case 'w': return _modes.wallops;
-        case 'r': return _modes.restricted;
-        case 'o': return _modes.operator_;
-        case 'O': return _modes.localOp;
-        case 's': return _modes.notices;
-        default: return false;
+    if (mode == 'o') {
+        return _modes.operator_;
     }
+    return false;
 }
 
 /**
@@ -353,14 +335,9 @@ void Client::setOperator(bool oper) {
  * @param value Value to set the mode to
  */
 void Client::setMode(char mode, bool value) {
-    switch (mode) {
-        case 'a': _modes.away = value; break;
-        case 'i': _modes.invisible = value; break;
-        case 'w': _modes.wallops = value; break;
-        case 'r': _modes.restricted = value; break;
-        case 'o': _modes.operator_ = value; _isOper = value; break;
-        case 'O': _modes.localOp = value; break;
-        case 's': _modes.notices = value; break;
+    if (mode == 'o') {
+        _modes.operator_ = value;
+        _isOper = value;
     }
 }
 
