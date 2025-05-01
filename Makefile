@@ -64,6 +64,7 @@ test: all
 	@echo "To connect with irssi, use: irssi -c localhost -p <port> -n nickname -w password"
 
 git:
+	@make fclean
 	@echo "$(CYAN)Adding all changes to git...$(RESET)"
 	@git add .
 	@echo "$(CYAN)Committing changes...$(RESET)"
