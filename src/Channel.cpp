@@ -5,8 +5,8 @@
  * Default constructor
  */
 Channel::Channel()
-    : _inviteOnly(false), _topicRestricted(true), _noExternalMessages(true), 
-      _moderated(false), _userLimit(0) {
+    : _inviteOnly(false), _topicRestricted(false), _noExternalMessages(true), 
+      _moderated(false), _userLimit(0) { // Default user limit is 0 (unlimited)
     
     _creationTime = time(NULL);
 }
@@ -19,8 +19,8 @@ Channel::Channel()
  * @param password Optional channel password
  */
 Channel::Channel(const std::string& name, Client* creator, const std::string& password)
-    : _name(name), _password(password), _inviteOnly(false), _topicRestricted(true), 
-      _noExternalMessages(true), _moderated(false), _userLimit(0) {
+    : _name(name), _password(password), _inviteOnly(false), _topicRestricted(false), 
+      _noExternalMessages(true), _moderated(false), _userLimit(0) { // Default user limit is 0 (unlimited)
     
     _creationTime = time(NULL);
     

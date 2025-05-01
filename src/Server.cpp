@@ -635,28 +635,30 @@ void Server::_registerClient(Client* client) {
     if (client->checkRegistration()) {
         // Send welcome messages
         std::string welcomeMsg = _buildReply(RPL_WELCOME, client, "Welcome to the Internet Relay Network " + client->getPrefix());
-        std::string hostMsg = _buildReply(RPL_YOURHOST, client, "Your host is " + _name + ", running version " + _version);
-        std::string createdMsg = _buildReply(RPL_CREATED, client, "This server was created " + _creationTime);
-        std::string myinfoMsg = _buildReply(RPL_MYINFO, client, _name + " " + _version + " iowsraOk ntlmb");
-        
         client->addToBuffer(welcomeMsg);
-        client->addToBuffer(hostMsg);
-        client->addToBuffer(createdMsg);
-        client->addToBuffer(myinfoMsg);
         
-        // Send MOTD
-        if (!_motd.empty()) {
-            std::string motdStartMsg = _buildReply(RPL_MOTDSTART, client, "- " + _name + " Message of the Day - ");
-            std::string motdMsg = _buildReply(RPL_MOTD, client, "- " + _motd);
-            std::string motdEndMsg = _buildReply(RPL_ENDOFMOTD, client, "End of MOTD command");
-            
-            client->addToBuffer(motdStartMsg);
-            client->addToBuffer(motdMsg);
-            client->addToBuffer(motdEndMsg);
-        } else {
-            std::string noMotdMsg = _buildReply(ERR_NOMOTD, client, "MOTD File is missing");
-            client->addToBuffer(noMotdMsg);
-        }
+        // Comment out unnecessary messages
+        // std::string hostMsg = _buildReply(RPL_YOURHOST, client, "Your host is " + _name + ", running version " + _version);
+        // std::string createdMsg = _buildReply(RPL_CREATED, client, "This server was created " + _creationTime);
+        // std::string myinfoMsg = _buildReply(RPL_MYINFO, client, _name + " " + _version + " iowsraOk ntlmb");
+        
+        // client->addToBuffer(hostMsg);
+        // client->addToBuffer(createdMsg);
+        // client->addToBuffer(myinfoMsg);
+        
+        // Comment out MOTD messages as requested
+        // if (!_motd.empty()) {
+        //     std::string motdStartMsg = _buildReply(RPL_MOTDSTART, client, "- " + _name + " Message of the Day - ");
+        //     std::string motdMsg = _buildReply(RPL_MOTD, client, "- " + _motd);
+        //     std::string motdEndMsg = _buildReply(RPL_ENDOFMOTD, client, "End of MOTD command");
+        //     
+        //     client->addToBuffer(motdStartMsg);
+        //     client->addToBuffer(motdMsg);
+        //     client->addToBuffer(motdEndMsg);
+        // } else {
+        //     std::string noMotdMsg = _buildReply(ERR_NOMOTD, client, "MOTD File is missing");
+        //     client->addToBuffer(noMotdMsg);
+        // }
         
         std::cout << "Client " << client->getFd() << " (" << client->getNickname() << ") registered" << std::endl;
     }

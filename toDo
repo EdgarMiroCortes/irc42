@@ -1,8 +1,7 @@
 
-cual es el limite por defecto de channels?
+what is the limits of the channels per default?
 
-
-
+we want to get rid of these messages, we feel its unnecessary, comment it out.
 :ft_irc 004 user1 ft_irc 1.0 iowsraOk ntlmb
 :ft_irc 375 user1 - ft_irc Message of the Day - 
 :ft_irc 376 user1 End of MOTD command

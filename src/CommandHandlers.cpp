@@ -411,6 +411,7 @@ void Server::_handleChannelMode(Message& message) {
     size_t currentParam = 2;
     std::string modeChanges = "";
     std::string paramChanges = "";
+    bool topicModeChanged = false;
     
     for (size_t i = 0; i < modeString.length(); i++) {
         char c = modeString[i];
@@ -447,6 +448,11 @@ void Server::_handleChannelMode(Message& message) {
                 }
                 paramChanges += param;
             }
+            
+            // Check if topic mode was changed
+            if (c == 't') {
+                topicModeChanged = true;
+            }
         }
     }
     
@@ -457,6 +463,17 @@ void Server::_handleChannelMode(Message& message) {
             modeMsg += " " + paramChanges;
         }
         channel->broadcastMessage(modeMsg);
+        
+        // If topic mode was changed, send additional info about current state
+        if (topicModeChanged) {
+            std::string topicMsg;
+            if (channel->isTopicRestricted()) {
+                topicMsg = _buildReply("NOTICE", client, channelName + " :Topic is now restricted to channel operators");
+            } else {
+                topicMsg = _buildReply("NOTICE", client, channelName + " :Topic can now be changed by all channel members");
+            }
+            channel->broadcastMessage(topicMsg);
+        }
     }
 }
 

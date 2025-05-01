@@ -63,4 +63,13 @@ test: all
 	@echo "To connect with netcat, use: nc -C localhost <port>"
 	@echo "To connect with irssi, use: irssi -c localhost -p <port> -n nickname -w password"
 
-.PHONY: all clean fclean re debug run test 
+git:
+	@echo "$(CYAN)Adding all changes to git...$(RESET)"
+	@git add .
+	@echo "$(CYAN)Committing changes...$(RESET)"
+	@git commit -m "auto commit from makefile"
+	@echo "$(CYAN)Pushing changes...$(RESET)"
+	@git push
+	@echo "$(GREEN)Git operations completed successfully!$(RESET)"
+
+.PHONY: all clean fclean re debug run test git 
