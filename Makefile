@@ -17,6 +17,11 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 # Headers
 HEADERS = $(wildcard $(INC_DIR)/*.hpp)
 
+# Server settings
+PORT = 6667
+PASSWORD = password
+DEFAULT_NICK = testuser
+
 # Colors for terminal output
 RED = \033[0;31m
 GREEN = \033[0;32m
@@ -56,7 +61,19 @@ debug: CXXFLAGS += -g
 debug: re
 
 run: all
-	./$(NAME) 6667 password
+	./$(NAME) $(PORT) $(PASSWORD)
+
+nc:
+	@echo "$(CYAN)Connecting to server with nc...$(RESET)"
+	@echo "$(YELLOW)Type these commands to register:$(RESET)"
+	@echo "  PASS $(PASSWORD)"
+	@echo "  NICK $(DEFAULT_NICK)"
+	@echo "  USER $(DEFAULT_NICK) 0 * :Test User"
+	@nc -C localhost $(PORT)
+
+irssi:
+	@echo "$(CYAN)Connecting to server with irssi...$(RESET)"
+	@irssi -c localhost -p $(PORT) -n $(DEFAULT_NICK) -w $(PASSWORD)
 
 test: all
 	@echo "$(CYAN)Running tests...$(RESET)"
@@ -73,4 +90,4 @@ git:
 	@git push
 	@echo "$(GREEN)Git operations completed successfully!$(RESET)"
 
-.PHONY: all clean fclean re debug run test git 
+.PHONY: all clean fclean re debug run test git nc irssi 
