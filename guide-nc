@@ -38,3 +38,8 @@ USERS LIMIT:
 	MODE #test -l (QUIT user limit. Now is "infinite")
 
 WHOIS user1 (solo funciona con nickname)
+
+RESTORE JOB:
+	CRTL + Z (kill the process)
+	jobs (see the recent closed jobs)
+	fg (to restore the process)

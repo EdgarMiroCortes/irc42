@@ -1,5 +1,43 @@
-IRSSI:
-/connect 127.0.0.1 4444 123
- /PRIVMSG user1 hola!
- /JOIN #test pass
- /PRIVMSG #test hola
+CONNECT:
+	SERVER:
+		./ircserv 4444 123 (iniciar servidor)
+	CLIENT:
+		irssi (init irssi)
+		/connect 127.0.0.1 4444 123 (it connects with your hostname as nick and user)
+
+MESSAGES:
+	TO A USER:
+		/MSG user1 mensaje privado!
+	TO A CHANNEL:
+		/MSG #test mensaje por canal!
+
+PERMISSIONS:
+	/MODE #test +o user1 (GIVE operator permissions to user1 in chanel #test)
+	/MODE #test -o user1 (REMOVE operator permissions to user1 in chanel #test)
+
+INVITE ONLY:
+	/INVITE user #test (invite a user) -> to enter only JOIN normally
+	/MODE #test +i (GIVE to a channel to invite only)
+	/MODE #test -i (REMOVE invite only from a channel)
+
+CHANNEL PASSWORDS:
+	/JOIN #test pass
+	/MODE #test +k pass (ADD password "pass" to a channel)
+	/MODE #test -k (REMOVE password from a channel)
+
+TOPIC:
+	/TOPIC #test (display topic)
+	/TOPIC #test tirapollo (set topic)
+	/MODE #test +t (RESTRICT change channel topic to only operators)
+	/MODE #test -t (QUIT RESCTRICTION and all can change topic)
+
+USERS LIMIT:
+	/MODE #test +l (LIMIT the number of users that can join the channel)
+	/MODE #test -l (QUIT user limit. Now is "infinite")
+
+/WHOIS user1 (solo funciona con nickname)
+
+RESTORE JOB:
+	CRTL + Z (kill the process)
+	jobs (see the recent closed jobs)
+	fg (to restore the process)

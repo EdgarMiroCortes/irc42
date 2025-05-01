@@ -3,3 +3,11 @@ socket
 poll
 fcntl
 
+Si ya estoy conectado desde irssi y vuelvo a usar el comando "/connect 127.0.0.1 4444 123", pasa esto:
+New connection from 127.0.0.1 on socket 4
+Received from 4: CAP LS
+Received from 4: PASS 123
+Received from 4: NICK emiro-co
+Received from 4: USER emiro-co emiro-co 127.0.0.1 :Edgar Miro Cortes
+malloc(): unaligned tcache chunk detected
+zsh: IOT instruction (core dumped)  ./ircserv 4444 123
