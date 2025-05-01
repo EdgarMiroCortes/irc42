@@ -11,10 +11,19 @@ PRIVMSG #test :Hola! -- : no son necesarios pero los anade
 
 WHOIS user1 (solo funciona con nickname)
 
-MODE #test +i (change a channel to invite only)
 INVITE user #test (invite a user) -> to enter only JOIN normally
 
-MODE #test +o user1 (give operator permissions to user1 in chanel #test)
+MODE #test +i (GIVE to a channel to invite only)
+MODE #test -i (REMOVE invite only from a channel)
+
+MODE #test +k pass (ADD password "pass" to a channel)
+MODE #test -k pass (REMOVE password from a channel)
+
+MODE #test +o user1 (GIVE operator permissions to user1 in chanel #test)
+MODE #test -o user1 (REMOVE operator permissions to user1 in chanel #test)
+
+MODE #test +t (RESTRICT change channel topic to only operators)
+MODE #test -t (QUIT RESCTRICTION and all can change topic)
 
 TOPIC #test (display topic)
 TOPIC #test tirapollo (set topic)
