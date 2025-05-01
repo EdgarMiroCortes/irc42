@@ -310,7 +310,15 @@ void Channel::setModerated(bool moderated) {
  * @param userLimit New user limit
  */
 void Channel::setUserLimit(unsigned int userLimit) {
+    // Update the limit
     _userLimit = userLimit;
+    
+    // Debug log
+    if (userLimit > 0) {
+        std::cout << "[DEBUG] Channel " << _name << " user limit set to " << userLimit << std::endl;
+    } else {
+        std::cout << "[DEBUG] Channel " << _name << " user limit removed" << std::endl;
+    }
 }
 
 /**
@@ -661,13 +669,24 @@ bool Channel::setMode(char mode, bool add, const std::string& param) {
                     return false;
                 }
                 try {
+                    // Check if the parameter is a valid number
+                    for (size_t i = 0; i < param.length(); i++) {
+                        if (!isdigit(param[i])) {
+                            return false;
+                        }
+                    }
+                    
                     unsigned int limit = static_cast<unsigned int>(atoi(param.c_str()));
+                    // Validate that limit is reasonable (>0 and not too large)
+                    if (limit == 0 || limit > 1000) {
+                        return false;
+                    }
                     setUserLimit(limit);
                 } catch (const std::exception& e) {
                     return false;
                 }
             } else {
-                setUserLimit(0);
+                setUserLimit(0); // Remove the limit
             }
             return true;
         

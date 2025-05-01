@@ -395,6 +395,14 @@ void Server::_handleChannelMode(Message& message) {
         std::string currentModes = channel->getModes();
         std::string modeReply = _buildReply(RPL_CHANNELMODEIS, client, channelName + " +" + currentModes);
         client->addToBuffer(modeReply);
+        
+        // If the channel has a user limit, show it
+        if (channel->getUserLimit() > 0) {
+            std::stringstream ss;
+            ss << channel->getUserLimit();
+            std::string limitMsg = _buildReply("NOTICE", client, channelName + " :Current user limit is " + ss.str());
+            client->addToBuffer(limitMsg);
+        }
         return;
     }
     
@@ -413,6 +421,7 @@ void Server::_handleChannelMode(Message& message) {
     std::string paramChanges = "";
     bool topicModeChanged = false;
     bool wasTopicRestricted = channel->isTopicRestricted();
+    bool userLimitChanged = false;
     
     for (size_t i = 0; i < modeString.length(); i++) {
         char c = modeString[i];
@@ -454,6 +463,11 @@ void Server::_handleChannelMode(Message& message) {
             if (c == 't') {
                 topicModeChanged = true;
             }
+            
+            // Check if user limit was changed
+            if (c == 'l') {
+                userLimitChanged = true;
+            }
         }
     }
     
@@ -479,6 +493,21 @@ void Server::_handleChannelMode(Message& message) {
                 }
                 channel->broadcastMessage(topicMsg);
             }
+        }
+        
+        // If user limit was changed, send additional info about current state
+        if (userLimitChanged) {
+            unsigned int newLimit = channel->getUserLimit();
+            std::string limitMsg;
+            
+            if (newLimit > 0) {
+                std::stringstream ss;
+                ss << newLimit;
+                limitMsg = ":" + _name + " NOTICE " + channelName + " :User limit is now set to " + ss.str();
+            } else {
+                limitMsg = ":" + _name + " NOTICE " + channelName + " :User limit has been removed";
+            }
+            channel->broadcastMessage(limitMsg);
         }
     }
 }
