@@ -1,6 +1,9 @@
-- MOTD File "USER u1 0 * :usuario1"
-- when using JOIN to create new channel,  channl is created properly but we get the error message
-    JOIN #test
+
+- when creatinf USER
+    :ft_irc 422 user1 MOTD File is missing
+- when using JOIN to create new channel,  channl is created properly but we get the error message:
+
+JOIN #test
 :user1 JOIN #test
 :user1!u1@127.0.0.1 JOIN #test
 :ft_irc 471 user1 #test :Cannot join channel (+l)

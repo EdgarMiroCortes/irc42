@@ -222,12 +222,48 @@ void Server::_handleJoin(Message& message) {
     Channel* channel = _getChannel(channelName);
     if (!channel) {
         channel = _createChannel(channelName, client, password);
+        
+        // Notificar JOIN al cliente
+        std::string joinMsg = ":" + client->getPrefix() + " JOIN " + channelName;
+        client->addToBuffer(joinMsg);
+        
+        // Enviar lista de miembros (RPL_NAMREPLY)
+        std::string namesMsg = _buildReply(RPL_NAMREPLY, client, "= " + channelName + " :" + channel->getClientsList());
+        client->addToBuffer(namesMsg);
+        std::string endNamesMsg = _buildReply(RPL_ENDOFNAMES, client, channelName + " :End of NAMES list");
+        client->addToBuffer(endNamesMsg);
+        
+        return;
     }
-
-    // Unir al cliente al canal
-    if (!channel->addClient(client)) {
+    
+    // Check if channel has a password
+    if (!channel->getPassword().empty() && channel->getPassword() != password) {
+        std::string errMsg = _buildReply(ERR_BADCHANNELKEY, client, channelName + " :Cannot join channel (+k)");
+        client->addToBuffer(errMsg);
+        return;
+    }
+    
+    // Check if channel is invite-only
+    if (channel->isInviteOnly() && !channel->isInvited(client)) {
+        std::string errMsg = _buildReply(ERR_INVITEONLYCHAN, client, channelName + " :Cannot join channel (+i)");
+        client->addToBuffer(errMsg);
+        return;
+    }
+    
+    // Check if channel is full
+    if (channel->getUserLimit() > 0 && channel->getClientCount() >= channel->getUserLimit()) {
         std::string errMsg = _buildReply(ERR_CHANNELISFULL, client, channelName + " :Cannot join channel (+l)");
         client->addToBuffer(errMsg);
+        return;
+    }
+
+    // Unir al cliente al canal (don't check for user limit here, we already checked)
+    if (!channel->addClient(client)) {
+        // Client might be banned
+        if (channel->isBanned(client)) {
+            std::string errMsg = _buildReply(ERR_BANNEDFROMCHAN, client, channelName + " :Cannot join channel (+b)");
+            client->addToBuffer(errMsg);
+        }
         return;
     }
 

@@ -36,12 +36,19 @@ Server::Server(int port, const std::string& password)
     : _name("ft_irc"), _version("1.0"), _port(port), _password(password), 
       _serverSocket(-1), _totalConnections(0) {
     
+    // Initialize statistics
     _startTime = time(NULL);
     _creationTime = currentDateTime();
-    _running = false;
     
     // Initialize command handlers
     _initializeCommandHandlers();
+    
+    // Set default MOTD
+    _motd = "Welcome to ft_irc server. Have a nice chat!";
+    
+    // Initialize signal handlers
+    _running = true;
+    signal(SIGINT, _signalHandler);
 }
 
 /**
@@ -787,6 +794,12 @@ Channel* Server::_getChannel(const std::string& name) {
  */
 Channel* Server::_createChannel(const std::string& name, Client* creator, const std::string& password) {
     Channel* channel = new Channel(name, creator, password);
+    
+    // If a password was provided, set the channel mode to +k
+    if (!password.empty()) {
+        channel->setMode('k', true, password);
+    }
+    
     _channels[toLower(name)] = channel;
     
     return channel;

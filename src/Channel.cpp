@@ -15,7 +15,7 @@ Channel::Channel()
  * Constructor with channel name, creator, and optional password
  * 
  * @param name Channel name
- * @param creator Channel creator client
+ * @param creator Channel creator
  * @param password Optional channel password
  */
 Channel::Channel(const std::string& name, Client* creator, const std::string& password)
@@ -326,21 +326,17 @@ bool Channel::addClient(Client* client) {
     
     // Check if client is already in the channel
     if (isClient(client)) {
-        std::cout << "[DEBUG] El cliente " << client->getNickname() << " ya está en el canal." << std::endl;
+        std::cout << "[DEBUG] Client " << client->getNickname() << " is already in the channel." << std::endl;
         return false;
     }
     
     // Check if the client is banned
     if (isBanned(client)) {
-        std::cout << "[DEBUG] El cliente " << client->getNickname() << " está baneado." << std::endl;
+        std::cout << "[DEBUG] Client " << client->getNickname() << " is banned." << std::endl;
         return false;
     }
     
-    // Check if the channel is full
-    if (_userLimit > 0 && _clients.size() >= _userLimit) {
-        std::cout << "[DEBUG] El canal está lleno." << std::endl;
-        return false;
-    }
+    // Note: User limit check is now done in the JOIN handler
     
     // Add client to channel
     _clients[client->getNickname()] = client;
@@ -348,14 +344,8 @@ bool Channel::addClient(Client* client) {
     // Add channel to client's channels
     client->joinChannel(this);
     
-    std::string joinMsg = ":" + client->getNickname() + " JOIN " + _name;
-    client->sendMessage(joinMsg);
-
-    broadcastMessage(joinMsg, client);
-    broadcastMessage(":" + client->getPrefix() + " JOIN " + _name);
-
-    std::cout << "[DEBUG] " << client->getNickname() << " se unió a " << _name 
-              << ". Miembros: " << _clients.size() << std::endl;
+    std::cout << "[DEBUG] " << client->getNickname() << " joined " << _name 
+              << ". Members: " << _clients.size() << std::endl;
 
     return true;
 }
