@@ -1,0 +1,11 @@
+- MOTD File "USER u1 0 * :usuario1"
+- when using JOIN to create new channel,  channl is created properly but we get the error message
+    JOIN #test
+:user1 JOIN #test
+:user1!u1@127.0.0.1 JOIN #test
+:ft_irc 471 user1 #test :Cannot join channel (+l)
+
+- JOIN with channel password parameter doesnt work, it creates channel but other users can access without a password
+(shouldnt be like it! should be restricted and expect a password with thejoin command)
+
+
