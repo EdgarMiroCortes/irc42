@@ -395,13 +395,25 @@ void Server::_initializeCommandHandlers() {
  */
 void Server::_setupServerSocket() {
     // Create socket
+        // socket(): Creates a new communication endpoint
+        // AF_INET: Address family for IPv4
+        // SOCK_STREAM: Connection-oriented TCP socket type
+        // 0: Default protocol (TCP for SOCK_STREAM)
     _serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    // If creation fails (_serverSocket == -1), prints error and returns.
     if (_serverSocket == -1) {
         std::cerr << "Error creating socket: " << strerror(errno) << std::endl;
         return;
     }
     
     // Set socket options
+        // setsockopt(): Sets socket options
+        // SOL_SOCKET: Option level (socket API level)
+        // SO_REUSEADDR: Allows local address reuse
+        // &opt: Pointer to option value (1 to enable)
+        // sizeof(opt): Size of option value
+    // This prevents "Address already in use" errors when restarting the server.
     int opt = 1;
     if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
         std::cerr << "Error setting socket options: " << strerror(errno) << std::endl;
@@ -411,6 +423,8 @@ void Server::_setupServerSocket() {
     }
     
     // Set non-blocking mode
+        // fcntl(): Gets current socket flags
+        // F_GETFL: Command to get file status flags
     int flags = fcntl(_serverSocket, F_GETFL, 0);
     if (flags == -1) {
         std::cerr << "Error getting socket flags: " << strerror(errno) << std::endl;
@@ -418,7 +432,10 @@ void Server::_setupServerSocket() {
         _serverSocket = -1;
         return;
     }
-    
+
+    // F_SETFL: Command to set file status flags
+    // flags | O_NONBLOCK: Combines existing flags with non-blocking flag
+    // Makes socket operations return immediately rather than blocking.
     if (fcntl(_serverSocket, F_SETFL, flags | O_NONBLOCK) == -1) {
         std::cerr << "Error setting non-blocking mode: " << strerror(errno) << std::endl;
         close(_serverSocket);
@@ -427,11 +444,17 @@ void Server::_setupServerSocket() {
     }
     
     // Bind socket
+        // memset: Clears the address structure.
+        // AF_INET: IPv4 address family
+        // INADDR_ANY: Binds to all available network interfaces
+        // htons(): Converts port number to network byte order (big-endian)
     memset(&_serverAddr, 0, sizeof(_serverAddr));
     _serverAddr.sin_family = AF_INET;
     _serverAddr.sin_addr.s_addr = INADDR_ANY;
     _serverAddr.sin_port = htons(_port);
     
+    // Associates socket with specified IP address and port
+    // (struct sockaddr*)&_serverAddr: Generic address structure cast
     if (bind(_serverSocket, (struct sockaddr*)&_serverAddr, sizeof(_serverAddr)) == -1) {
         std::cerr << "Error binding socket: " << strerror(errno) << std::endl;
         close(_serverSocket);
@@ -440,6 +463,8 @@ void Server::_setupServerSocket() {
     }
     
     // Listen for connections
+        // Puts socket in passive mode to accept connections
+        // 10: Maximum length of pending connections queue (backlog)
     if (listen(_serverSocket, 10) == -1) {
         std::cerr << "Error listening on socket: " << strerror(errno) << std::endl;
         close(_serverSocket);
@@ -448,6 +473,9 @@ void Server::_setupServerSocket() {
     }
     
     // Add server socket to poll fds
+        // Creates pollfd structure for socket monitoring
+        // POLLIN: We're interested in read events (incoming connections)
+        // Adds this structure to _pollfds vector for later monitoring
     struct pollfd pfd;
     pfd.fd = _serverSocket;
     pfd.events = POLLIN;
@@ -455,6 +483,8 @@ void Server::_setupServerSocket() {
     _pollfds.push_back(pfd);
     
     // Get hostname
+        // gethostname(): Gets system hostname
+        // Falls back to "localhost" if retrieval fails
     char hostname[256];
     if (gethostname(hostname, sizeof(hostname)) == 0) {
         _host = hostname;
