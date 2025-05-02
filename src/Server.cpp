@@ -118,9 +118,14 @@ void Server::run() {
     std::cout << "Server is running on port " << _port << std::endl;
     std::cout << "Press Ctrl+C to stop the server" << std::endl;
     
+    // Principal IRC loop
     while (_running) {
         // Wait for events on the poll fds
-        int numEvents = poll(&_pollfds[0], _pollfds.size(), 1000); // 1 second timeout
+            // poll(): Monitors multiple file descriptors for events
+            // &_pollfds[0]: Pointer to first element in pollfd array
+            // _pollfds.size(): Number of file descriptors to monitor
+            // 1000: Timeout in milliseconds (1 second)
+        int numEvents = poll(&_pollfds[0], _pollfds.size(), 1000);
         
         if (numEvents == -1) {
             if (errno == EINTR) {
@@ -137,22 +142,25 @@ void Server::run() {
             if (_pollfds[i].revents == 0) {
                 continue;
             }
-            
             numEvents--;
             
+            // New connection on the server socket
             if (_pollfds[i].fd == _serverSocket) {
-                // New connection on the server socket
                 if (_pollfds[i].revents & POLLIN) {
-                    _acceptNewConnection();
+                    _acceptNewConnection(); // !!! Edgar: he comentado hasta aqui!
                 }
-            } else {
-                // Activity on a client socket
+            } 
+            // Activity on a client socket
+            else {
+                // Client sends data
                 if (_pollfds[i].revents & POLLIN) {
                     _handleClientInput(_pollfds[i].fd);
                 }
+                // Send a message to a client
                 if (_pollfds[i].revents & POLLOUT) {
                     _handleClientOutput(_pollfds[i].fd);
                 }
+                // Client left the server
                 if (_pollfds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
                     _removeClient(_pollfds[i].fd);
                     i--; // Adjust index since we removed an element
@@ -497,11 +505,18 @@ void Server::_setupServerSocket() {
  * Accept new connection
  */
 void Server::_acceptNewConnection() {
+    // clientAddr: Structure to store client address information
+    // clientAddrLen: Size of the address structure (initialized for accept())
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen = sizeof(clientAddr);
     
+    // accept(): Accepts a new connection on the server socket
+    // _serverSocket: The listening server socket
+    // (struct sockaddr*)&clientAddr: Pointer to client address structure
+    // &clientAddrLen: Pointer to size of address structure (updated with actual size)
     int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
     if (clientFd == -1) {
+        // Ignores EAGAIN/EWOULDBLOCK errors (normal for non-blocking sockets)
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             std::cerr << "Error accepting connection: " << strerror(errno) << std::endl;
         }
@@ -509,6 +524,8 @@ void Server::_acceptNewConnection() {
     }
     
     // Set non-blocking mode
+        // fnctl: Gets current file descriptor flags
+        // F_GETFL: Command to get file status flags
     int flags = fcntl(clientFd, F_GETFL, 0);
     if (flags == -1) {
         std::cerr << "Error getting client socket flags: " << strerror(errno) << std::endl;
@@ -516,6 +533,7 @@ void Server::_acceptNewConnection() {
         return;
     }
     
+    // Sets non-blocking mode using O_NONBLOCK flag
     if (fcntl(clientFd, F_SETFL, flags | O_NONBLOCK) == -1) {
         std::cerr << "Error setting client socket to non-blocking: " << strerror(errno) << std::endl;
         close(clientFd);
@@ -523,6 +541,9 @@ void Server::_acceptNewConnection() {
     }
     
     // Add client to poll fds
+        // Creates new pollfd structure for the client
+        // POLLIN | POLLOUT: Monitor for both read and write readiness
+        // Adds to server's poll file descriptor vector
     struct pollfd pfd;
     pfd.fd = clientFd;
     pfd.events = POLLIN | POLLOUT;
@@ -530,6 +551,10 @@ void Server::_acceptNewConnection() {
     _pollfds.push_back(pfd);
     
     // Get client hostname
+        // inet_ntop(): Converts IP address to human-readable string
+        // AF_INET: IPv4 address family
+        // clientAddr.sin_addr: Client's IP address
+        // INET_ADDRSTRLEN: Buffer size (16 bytes for IPv4)
     char hostname[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(clientAddr.sin_addr), hostname, INET_ADDRSTRLEN);
     

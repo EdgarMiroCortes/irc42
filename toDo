@@ -11,3 +11,5 @@ Received from 4: NICK emiro-co
 Received from 4: USER emiro-co emiro-co 127.0.0.1 :Edgar Miro Cortes
 malloc(): unaligned tcache chunk detected
 zsh: IOT instruction (core dumped)  ./ircserv 4444 123
+
+https://chat.deepseek.com/a/chat/s/10a42cd5-1096-4b0e-9c84-b0869479d87a
