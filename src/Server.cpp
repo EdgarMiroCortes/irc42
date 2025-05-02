@@ -147,7 +147,7 @@ void Server::run() {
             // New connection on the server socket
             if (_pollfds[i].fd == _serverSocket) {
                 if (_pollfds[i].revents & POLLIN) {
-                    _acceptNewConnection(); // !!! Edgar: he comentado hasta aqui!
+                    _acceptNewConnection();
                 }
             } 
             // Activity on a client socket
